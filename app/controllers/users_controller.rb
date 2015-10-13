@@ -12,20 +12,26 @@ class UsersController < ApplicationController
   def sign_up
   end
   def sign_up!
-    user = User.new(
+    @user = User.new(
       username: params[:username],
       useremail: params[:useremail],
       password_digest: BCrypt::Password.create(params[:password])
     )
     if params[:password_confirmation] != params[:password]
       message = "Your passwords don't match!"
-    elsif user.save
+    elsif params[:password_confirmation] == params[:password]
+      @user.save
       message = "Your account has been created!"
     else
       message = "Your account couldn't be created. Did you enter a unique username and password?"
     end
+    cookies[:username] = {
+      value: @user.username,
+      expires: 3.years.from_now
+    }
+    session[:user] = @user
     flash[:notice] = message
-    redirect_to action: :sign_in
+    redirect_to recipes_path
   end
   def sign_in
   end
